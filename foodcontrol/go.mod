@@ -1,4 +1,4 @@
-module github.com/jcotrado/hyperleger-convergenciax-chaincode-foodcontrol
+module github.com/jcotrado/hyperleger-convergenciax-chaincode-foodcontrol/foodcontrol
 
 go 1.13
 
