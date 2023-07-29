@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	//"github.com/hyperledger/fabric-chaincode-go/tree/main/pkg/cid"
+	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -10,14 +13,48 @@ type SmartContract struct {
 	contractapi.Contract
 }
 
+// COodigos de error retornados por fallas con IOU states
+
+var {
+	errMissingOU = errors.New("La identidad no trae el OU requerido para ejeuttar la transacción")
+}
+
 // Food provee funciones basicas para el control de comida
 type Food struct {
 	Agricultor string `json:"agricultor"`
-	Variedad string	  `json:"variedad"`
-}
+	Organizacion string `json:"organizacion"`
+	Variedad string `json:"variedad"`
+	
+} 
 
 // Se definie que esta funcion ahora es parte del smartcontract
-func (s *SmartContract) Set(ctx contractapi.TransactionContextInterface, foodId string, agricultor string,  variedad string)  error {
+//func (s *SmartContract) Set(ctx contractapi.TransactionContextInterface, foodId string, agricultor string,  variedad string)  error {
+func (s *SmartContract) Set(ctx contractapi.TransactionContextInterface, foodId string, variedad string)  error {
+
+	//Se obtiene el agricultor desde contexto con paquete cid.
+	hasOU, err := cid.hasOUValue( ctx.GetStub(), "department2") // Ahora se validar el OU del certificado del cliente
+	if err != nil{
+		return err
+	}
+
+	if !hasOU {
+		return errMissingOU
+	}
+
+
+	identidad := ctx.GetClientIdentity()
+	
+	agricultor, err := identidad.GetID()
+	if err != nil {
+		return err
+	}
+
+	org, err := identidad.GetID()
+	if err != nil {
+		return err
+	}
+
+
 
 	//Validaciones de sintaxis.
 
@@ -35,6 +72,7 @@ func (s *SmartContract) Set(ctx contractapi.TransactionContextInterface, foodId 
 	//joel.cotrado++ convierte la estructura en bytes para almacenarla en la DLT
 	food := Food{
 		Agricultor:  agricultor,
+		Organizacion: org,
 		Variedad: variedad,
 	}
 
