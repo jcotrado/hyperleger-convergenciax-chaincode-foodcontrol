@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	//"github.com/hyperledger/fabric-chaincode-go/tree/main/pkg/cid"
+	
 	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -15,9 +15,10 @@ type SmartContract struct {
 
 // COodigos de error retornados por fallas con IOU states
 
-var {
+var (
 	errMissingOU = errors.New("La identidad no trae el OU requerido para ejeuttar la transacción")
-}
+	//errMissingOU = errors.New("The identity does not belong to the OU required to execute this transaction")
+)
 
 // Food provee funciones basicas para el control de comida
 type Food struct {
@@ -32,7 +33,9 @@ type Food struct {
 func (s *SmartContract) Set(ctx contractapi.TransactionContextInterface, foodId string, variedad string)  error {
 
 	//Se obtiene el agricultor desde contexto con paquete cid.
-	hasOU, err := cid.hasOUValue( ctx.GetStub(), "department2") // Ahora se validar el OU del certificado del cliente
+	hasOU, err := cid.hasOUValue(ctx.GetStub(), "department2") // Ahora se validar el OU del certificado del cliente
+	
+	
 	if err != nil{
 		return err
 	}
@@ -55,12 +58,9 @@ func (s *SmartContract) Set(ctx contractapi.TransactionContextInterface, foodId 
 	}
 
 
-
 	//Validaciones de sintaxis.
 
 	//Validaciones de Negocios
-
-
 
 	//food, err := s.Query(ctx,foodId)
 	//if food != nil {
