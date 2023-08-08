@@ -1,23 +1,31 @@
 package main
 
+// 
+// Copyright ConvergenciaX Spa.
+// Autor: Joel Cotrado Vargas <joel.cotrado@gmail.com>
+// Date: 01-04-2023
+// Implementación de smartcontract foodcontrol con control de PKI OU
+//
+
+
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	//"github.com/hyperledger/fabric-chaincode-go/tree/main/pkg/cid"
+
 	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
-
 type SmartContract struct {
 	contractapi.Contract
 }
 
 // COodigos de error retornados por fallas con IOU states
 
-var {
+var (
 	errMissingOU = errors.New("La identidad no trae el OU requerido para ejeuttar la transacción")
-}
+
+)
 
 // Food provee funciones basicas para el control de comida
 type Food struct {
@@ -31,13 +39,24 @@ type Food struct {
 //func (s *SmartContract) Set(ctx contractapi.TransactionContextInterface, foodId string, agricultor string,  variedad string)  error {
 func (s *SmartContract) Set(ctx contractapi.TransactionContextInterface, foodId string, variedad string)  error {
 
-	//Se obtiene el agricultor desde contexto con paquete cid.
-	hasOU, err := cid.hasOUValue( ctx.GetStub(), "department2") // Ahora se validar el OU del certificado del cliente
+	//Se obtiene el agricultor desde contexto con paquete cid y valida el OU del certificado del cliente
+	//hasOU, err := cid.hasOUValue(ctx.GetStub(), "department2") 
+
+
+	hasOUctx, err := cid.HasOUValue(ctx.GetStub(),"department2")
+
+	if err != nil {
+		return nil
+	}
+	
+ 
+    fmt.Printf("hasOUctx : %s", hasOUctx)
+ 
 	if err != nil{
 		return err
 	}
 
-	if !hasOU {
+	if !hasOUctx {
 		return errMissingOU
 	}
 
@@ -55,12 +74,9 @@ func (s *SmartContract) Set(ctx contractapi.TransactionContextInterface, foodId 
 	}
 
 
-
 	//Validaciones de sintaxis.
 
 	//Validaciones de Negocios
-
-
 
 	//food, err := s.Query(ctx,foodId)
 	//if food != nil {
@@ -110,7 +126,7 @@ func (s *SmartContract) Query(ctx contractapi.TransactionContextInterface, foodI
 	return food, nil
 }
 
-func main()  {
+func main(){
 	
 	// inicializa un chaincode
 	chaincode, err := contractapi.NewChaincode(new(SmartContract) )
